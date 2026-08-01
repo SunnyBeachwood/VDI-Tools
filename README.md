@@ -2,6 +2,22 @@
 
 VDI-Tools is a Windows utility for cloning, converting, inspecting, enlarging, and optimizing virtual disk images. It supports VDI input as well as selected VHD, VMDK, Parallels HDD, and RAW images; output is a dynamically expanding VDI.
 
+Built on the foundations of CloneVDI and SlimVDI, VDI-Tools adds a modern multilingual main interface, safer in-place VDI operations, and encryption detection to help users make better-informed decisions before modifying a virtual disk.
+
+## Key enhancements
+
+### Multilingual interface
+
+The main window has a language selector. It can follow the Windows UI language automatically or use a manually selected language. VDI-Tools currently provides English, Simplified Chinese, German, Japanese, French, Spanish, Traditional Chinese, Korean, Russian, and Brazilian Portuguese.
+
+### Direct in-place VDI modification
+
+In addition to creating a new VDI, VDI-Tools can directly modify a supported source VDI in place. This mode supports compacting unused blocks and enlarging the virtual drive, with a recovery journal for unfinished operations. Because an in-place operation changes the source file itself, close all virtual machines and make a verified backup before proceeding.
+
+### Disk encryption detection
+
+Before cloning or modifying a virtual disk, VDI-Tools scans for encryption indicators. When encryption is detected or suspected, the application shows a warning so that the user can stop and review the operation before any change is made.
+
 ## License
 
 VDI-Tools is distributed under the GNU General Public License, version 3 only (GPL-3.0). The complete license text is in [LICENSE](LICENSE).
@@ -9,6 +25,10 @@ VDI-Tools is distributed under the GNU General Public License, version 3 only (G
 ## Upstream code and notices
 
 VDI-Tools includes modified code derived from CloneVDI, authored by Don Milne, and incorporates work from the SlimVDI fork by hakito. The project has been renamed to **VDI-Tools** and is not affiliated with, endorsed by, or supported by the original authors.
+
+## Acknowledgements
+
+Sincere thanks to **Don Milne**, the author of CloneVDI, for creating the robust foundation on which this project is built and for making the source available under a permissive license. We also thank **hakito** for the SlimVDI fork and its continued improvements. VDI-Tools would not exist without their work.
 
 The CloneVDI-derived portions are copyright:
 
