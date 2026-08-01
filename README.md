@@ -1,5 +1,7 @@
 # VDI-Tools
 
+[简体中文版](README.zh-CN.md)
+
 VDI-Tools is a Windows utility for cloning, converting, inspecting, enlarging, and optimizing virtual disk images. It supports VDI input as well as selected VHD, VMDK, Parallels HDD, and RAW images; output is a dynamically expanding VDI.
 
 Built on the foundations of CloneVDI and SlimVDI, VDI-Tools adds a modern multilingual main interface, safer in-place VDI operations, and encryption detection to help users make better-informed decisions before modifying a virtual disk.
