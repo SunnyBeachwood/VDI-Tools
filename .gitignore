@@ -23,5 +23,8 @@ Source Release/
 *.VC.VC.opendb
 .vs/
 
+# Per-user application settings (recent paths and language preference)
+VDI-Tools.ini
+
 # Generated image source; the final PNG and ICO are versioned.
 Resource/icons/VDI-Tools-source.png
