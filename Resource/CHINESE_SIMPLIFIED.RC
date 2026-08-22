@@ -1,0 +1,531 @@
+#pragma code_page(65001)
+
+/* Simplified Chinese resources for CloneVDI. */
+
+DLG_ALT_PROGRESS_ZH_CN DIALOG 47, 52, 273, 122
+STYLE 0x4L | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_THICKFRAME
+CAPTION "正在克隆虚拟硬盘..."
+FONT 9, "Microsoft YaHei UI"
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+{
+ GROUPBOX "进度", -1, 3, 1, 266, 52, BS_GROUPBOX
+ LTEXT "正在克隆源虚拟磁盘，请稍候...", 300, 9, 13, 209, 8
+ CONTROL "%ld%%", 200, "SSCCThermo", 0 | WS_CHILD | WS_VISIBLE | WS_BORDER, 9, 24, 252, 12
+ LTEXT "文件名...", 201, 9, 39, 252, 8
+ GROUPBOX "统计", -1, 4, 54, 266, 46, BS_GROUPBOX
+ LTEXT "已完成 MB：", -1, 9, 66, 49, 8
+ LTEXT "0", 202, 61, 66, 58, 8
+ LTEXT "剩余 MB：", -1, 122, 66, 63, 8
+ LTEXT "0", 203, 187, 66, 72, 8
+ LTEXT "已用时间：", -1, 9, 76, 49, 8
+ LTEXT "0秒", 204, 61, 76, 58, 8
+ LTEXT "剩余时间：", -1, 121, 76, 63, 8
+ LTEXT "0秒", 205, 187, 76, 64, 8
+ LTEXT "数据速率：", -1, 9, 86, 49, 8
+ LTEXT "0cps", 206, 61, 86, 58, 8
+ PUSHBUTTON "取消", 2, 4, 105, 50, 14
+}
+
+DLG_CLONEVDI_ZH_CN DIALOG 171, 140, 365, 260
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "虚拟硬盘克隆与优化 v%lu.%02lX"
+FONT 9, "Microsoft YaHei UI"
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+{
+ GROUPBOX " 文件名 ", -1, 3, 2, 354, 47, BS_GROUPBOX
+ LTEXT "源文件：", -1, 9, 15, 59, 8
+ EDITTEXT 200, 71, 13, 233, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ PUSHBUTTON "浏览(&B)...", 201, 307, 12, 45, 14, WS_GROUP | WS_TABSTOP
+ LTEXT "目标文件：", -1, 9, 32, 60, 8
+ EDITTEXT 202, 71, 30, 233, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ PUSHBUTTON "浏览(&R)...", 203, 307, 29, 45, 14, WS_GROUP | WS_TABSTOP
+ GROUPBOX " 源磁盘信息 ", -1, 3, 51, 354, 56, BS_GROUPBOX
+ LTEXT "验证结果：", -1, 9, 62, 61, 8, NOT WS_GROUP
+ LTEXT "文本", 204, 71, 61, 278, 12, NOT WS_GROUP | WS_BORDER
+ LTEXT "磁盘大小：", -1, 9, 77, 59, 8, NOT WS_GROUP
+ LTEXT "文本", 205, 71, 76, 66, 12, NOT WS_GROUP | WS_BORDER
+ LTEXT "文件系统：", -1, 156, 77, 43, 8, NOT WS_GROUP
+ LTEXT "文本", 206, 202, 76, 147, 12, NOT WS_GROUP | WS_BORDER
+ LTEXT "加密状态：", -1, 156, 92, 43, 8, NOT WS_GROUP
+ LTEXT "文本", 216, 202, 91, 147, 12, NOT WS_GROUP | WS_BORDER
+ GROUPBOX " 选项 ", -1, 3, 109, 354, 94, BS_GROUPBOX | WS_GROUP
+ AUTORADIOBUTTON "创建新的 VDI", 214, 9, 119, 105, 12, WS_GROUP | WS_TABSTOP
+ AUTORADIOBUTTON "直接修改源 VDI（高风险）", 215, 130, 119, 145, 12, WS_TABSTOP
+ AUTOCHECKBOX "生成新 UUID", 207, 9, 133, 95, 12
+ AUTOCHECKBOX "保留原 UUID", 208, 9, 145, 100, 12
+ AUTOCHECKBOX "将虚拟磁盘增大到", 209, 9, 159, 103, 12
+ EDITTEXT 210, 114, 159, 50, 12, WS_BORDER | WS_TABSTOP
+ AUTOCHECKBOX "同时增大分区", 211, 9, 171, 100, 12
+ AUTOCHECKBOX "压缩未使用的磁盘块", 212, 9, 183, 131, 12
+ GROUPBOX " 关于 ", -1, 3, 206, 354, 26, BS_GROUPBOX | WS_GROUP
+ CTEXT "虚拟硬盘克隆工具 v%lu.%02lX。版权所有 (c) %lu - Don Milne（又名 mpack）。", 213, 6, 216, 345, 8, SS_CENTER | NOT WS_GROUP
+ PUSHBUTTON "分区信息(&P)...", 300, 3, 240, 66, 14, WS_GROUP | WS_TABSTOP
+ PUSHBUTTON "头信息(&H)...", 301, 72, 240, 66, 14, WS_GROUP | WS_TABSTOP
+ PUSHBUTTON "扇区查看器(&S)...", 302, 140, 240, 66, 14, WS_GROUP | WS_TABSTOP
+ PUSHBUTTON "开始(&G)", 1, 253, 240, 50, 14, WS_GROUP | WS_TABSTOP
+ DEFPUSHBUTTON "退出(&X)", 2, 306, 240, 50, 14, BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP
+ LTEXT "（如果不了解 UUID，请保持选中此项！）", -1, 108, 135, 176, 8
+}
+
+DLG_PARTINFO_ZH_CN DIALOG 22, 31, 361, 116
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "虚拟磁盘分区信息..."
+FONT 9, "Microsoft YaHei UI"
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+{
+ LTEXT "分区", -1, 9, 14, 22, 16, NOT WS_GROUP
+ DEFPUSHBUTTON "关闭(&C)", 2, 150, 94, 50, 14, BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP
+ LTEXT "CHS 地址\n起始扇区", -1, 61, 14, 45, 16
+ LTEXT "分区\n类型", -1, 124, 14, 31, 16
+ LTEXT "CHS 地址\n结束扇区", -1, 162, 14, 61, 16
+ LTEXT "LBA 地址\n起始扇区", -1, 233, 14, 48, 16
+ LTEXT "扇区\n数量", -1, 290, 14, 48, 16
+ LTEXT "1", -1, 13, 39, 9, 8
+ LTEXT "2", -1, 13, 50, 9, 8
+ LTEXT "3", -1, 13, 61, 9, 8
+ LTEXT "4", -1, 13, 72, 9, 8
+ LTEXT "可\n启动？", -1, 32, 14, 24, 16
+ LTEXT "是", 200, 36, 39, 11, 8
+ LTEXT "是", 201, 55, 39, 64, 8
+ LTEXT "是", 202, 124, 39, 24, 8
+ LTEXT "是", 203, 158, 39, 68, 8
+ LTEXT "是", 204, 232, 39, 54, 8
+ LTEXT "是", 205, 290, 39, 54, 8
+ LTEXT "是", 206, 36, 50, 11, 8
+ LTEXT "是", 207, 55, 50, 64, 8
+ LTEXT "是", 208, 124, 50, 24, 8
+ LTEXT "是", 209, 158, 50, 68, 8
+ LTEXT "是", 210, 232, 50, 54, 8
+ LTEXT "是", 211, 290, 50, 54, 8
+ LTEXT "是", 212, 36, 61, 11, 8
+ LTEXT "是", 213, 55, 61, 64, 8
+ LTEXT "是", 214, 124, 61, 24, 8
+ LTEXT "是", 215, 158, 61, 68, 8
+ LTEXT "是", 216, 232, 61, 54, 8
+ LTEXT "是", 217, 290, 61, 54, 8
+ LTEXT "是", 218, 36, 72, 11, 8
+ LTEXT "是", 219, 55, 72, 64, 8
+ LTEXT "是", 220, 124, 72, 24, 8
+ LTEXT "是", 221, 158, 72, 68, 8
+ LTEXT "是", 222, 232, 72, 54, 8
+ LTEXT "是", 223, 290, 72, 54, 8
+ GROUPBOX " 分区表 ", -1, 3, 3, 353, 32, BS_GROUPBOX
+ GROUPBOX " 分区表 ", -1, 3, 3, 24, 83, BS_GROUPBOX
+ GROUPBOX " 分区表 ", -1, 3, 3, 50, 83, BS_GROUPBOX
+ GROUPBOX " 分区表 ", -1, 3, 3, 118, 83, BS_GROUPBOX
+ GROUPBOX " 分区表 ", -1, 3, 3, 150, 83, BS_GROUPBOX
+ GROUPBOX " 分区表 ", -1, 3, 3, 227, 83, BS_GROUPBOX
+ GROUPBOX " 分区表 ", -1, 3, 3, 284, 83, BS_GROUPBOX
+ GROUPBOX " 分区表 ", -1, 3, 3, 353, 83, BS_GROUPBOX
+}
+
+DLG_VDI_HDR_INFO_ZH_CN DIALOG 32, 23, 252, 256
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "VDI 头信息..."
+FONT 9, "Microsoft YaHei UI"
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+{
+ GROUPBOX " 前置头 ", -1, 3, 3, 246, 45, BS_GROUPBOX
+ LTEXT "信息字符串：", -1, 9, 14, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 200, 75, 14, 171, 8, NOT WS_GROUP
+ DEFPUSHBUTTON "关闭(&C)", 2, 99, 239, 50, 14, BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP
+ LTEXT "签名字：", -1, 9, 24, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 201, 75, 24, 171, 8, NOT WS_GROUP
+ LTEXT "格式版本：", -1, 9, 35, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 202, 75, 35, 171, 8, NOT WS_GROUP
+ GROUPBOX " 头 ", -1, 3, 49, 246, 143, BS_GROUPBOX
+ LTEXT "类型：", -1, 9, 59, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 203, 75, 59, 171, 8, NOT WS_GROUP
+ LTEXT "标志：", -1, 9, 69, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 204, 75, 69, 171, 8, NOT WS_GROUP
+ LTEXT "旧式几何参数：", -1, 9, 79, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 205, 75, 79, 171, 8, NOT WS_GROUP
+ LTEXT "磁盘大小：", -1, 9, 89, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 206, 75, 89, 171, 8, NOT WS_GROUP
+ LTEXT "块大小：", -1, 9, 99, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 207, 75, 99, 171, 8, NOT WS_GROUP
+ LTEXT "块额外字节：", -1, 9, 109, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 208, 75, 109, 171, 8, NOT WS_GROUP
+ LTEXT "块总数：", -1, 9, 119, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 209, 75, 119, 171, 8, NOT WS_GROUP
+ LTEXT "已分配块：", -1, 9, 129, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 210, 75, 129, 171, 8, NOT WS_GROUP
+ LTEXT "UUID（创建）：", -1, 9, 139, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 211, 75, 139, 171, 8, NOT WS_GROUP
+ LTEXT "UUID（修改）：", -1, 9, 149, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 212, 75, 149, 171, 8, NOT WS_GROUP
+ LTEXT "UUID（父级）：", -1, 9, 159, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 213, 75, 159, 171, 8, NOT WS_GROUP
+ LTEXT "UUID（父级修改）：", -1, 9, 169, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 214, 75, 169, 171, 8, NOT WS_GROUP
+ LTEXT "LCHS 几何参数：", -1, 9, 179, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 215, 75, 179, 171, 8, NOT WS_GROUP
+ GROUPBOX " 注释 ", -1, 3, 192, 246, 43, BS_GROUPBOX
+ LTEXT "文本", 216, 9, 200, 235, 32, NOT WS_GROUP
+}
+
+DLG_VHD_HDR_INFO_ZH_CN DIALOG 34, 13, 252, 200
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "VHD 头信息..."
+FONT 9, "Microsoft YaHei UI"
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+{
+ GROUPBOX " 脚注 ", -1, 3, 3, 246, 103, BS_GROUPBOX
+ LTEXT "Cookie 字符串：", -1, 9, 14, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 200, 75, 14, 171, 8, NOT WS_GROUP
+ DEFPUSHBUTTON "关闭(&C)", 2, 99, 181, 50, 14, BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP
+ LTEXT "功能标志：", -1, 9, 24, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 201, 75, 24, 171, 8, NOT WS_GROUP
+ LTEXT "格式版本：", -1, 9, 34, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 202, 75, 34, 171, 8, NOT WS_GROUP
+ GROUPBOX " 动态头 ", -1, 3, 107, 246, 69, BS_GROUPBOX
+ LTEXT "创建程序：", -1, 9, 44, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 203, 75, 44, 171, 8, NOT WS_GROUP
+ LTEXT "创建系统：", -1, 9, 54, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 204, 75, 54, 171, 8, NOT WS_GROUP
+ LTEXT "虚拟大小：", -1, 9, 64, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 205, 75, 64, 171, 8, NOT WS_GROUP
+ LTEXT "VHD 类型：", -1, 9, 73, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 206, 75, 73, 171, 8, NOT WS_GROUP
+ LTEXT "UUID（创建）：", -1, 9, 83, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 207, 75, 83, 171, 8, NOT WS_GROUP
+ LTEXT "已保存状态：", -1, 9, 92, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 208, 75, 92, 171, 8, NOT WS_GROUP
+ LTEXT "块总数：", -1, 9, 119, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 209, 75, 119, 171, 8, NOT WS_GROUP
+ LTEXT "已分配块：", -1, 9, 129, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 210, 75, 129, 171, 8, NOT WS_GROUP
+ LTEXT "动态头版本：", -1, 9, 139, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 211, 75, 139, 171, 8, NOT WS_GROUP
+ LTEXT "块大小：", -1, 9, 149, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 212, 75, 149, 171, 8, NOT WS_GROUP
+ LTEXT "UUID（父级）：", -1, 9, 159, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 213, 75, 159, 171, 8, NOT WS_GROUP
+}
+
+DLG_HDD_HDR_INFO_ZH_CN DIALOG 58, 37, 199, 108
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "HDD 头信息..."
+FONT 9, "Microsoft YaHei UI"
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+{
+ GROUPBOX " 头 ", -1, 3, 3, 193, 77, BS_GROUPBOX
+ LTEXT "信息字符串：", -1, 9, 14, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 200, 75, 14, 115, 8, NOT WS_GROUP
+ DEFPUSHBUTTON "关闭(&C)", 2, 72, 87, 50, 14, BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP
+ LTEXT "格式版本：", -1, 9, 24, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 201, 75, 24, 115, 8, NOT WS_GROUP
+ LTEXT "几何参数：", -1, 9, 34, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 202, 75, 34, 115, 8, NOT WS_GROUP
+ LTEXT "块大小：", -1, 9, 44, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 203, 75, 44, 115, 8, NOT WS_GROUP
+ LTEXT "块总数：", -1, 9, 54, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 204, 75, 54, 115, 8, NOT WS_GROUP
+ LTEXT "虚拟大小：", -1, 9, 64, 63, 8, NOT WS_GROUP
+ LTEXT "文本", 205, 75, 64, 115, 8, NOT WS_GROUP
+}
+
+DLG_VMDK_HDR_INFO_ZH_CN DIALOG 15, 27, 424, 209
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "VMDK 头信息..."
+FONT 9, "Microsoft YaHei UI"
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+{
+ GROUPBOX " 描述符 ", -1, 3, 3, 416, 73, BS_GROUPBOX
+ LTEXT "版本：", -1, 9, 13, 59, 8, NOT WS_GROUP
+ LTEXT "文本", 200, 72, 13, 138, 8, NOT WS_GROUP
+ LTEXT "磁盘签名：", -1, 9, 23, 59, 8, NOT WS_GROUP
+ LTEXT "文本", 201, 72, 23, 138, 8, NOT WS_GROUP
+ LTEXT "父级签名：", -1, 9, 33, 59, 8, NOT WS_GROUP
+ LTEXT "文本", 202, 72, 33, 138, 8, NOT WS_GROUP
+ LTEXT "磁盘类型：", -1, 9, 43, 59, 8, NOT WS_GROUP
+ LTEXT "文本", 203, 72, 43, 138, 8, NOT WS_GROUP
+ LTEXT "UUID：", -1, 9, 53, 59, 8, NOT WS_GROUP
+ LTEXT "文本", 204, 72, 53, 170, 8, NOT WS_GROUP
+ LTEXT "分片数量：", -1, 9, 63, 59, 8, NOT WS_GROUP
+ LTEXT "文本", 205, 72, 63, 138, 8, NOT WS_GROUP
+ GROUPBOX " 分片 ", -1, 3, 77, 417, 106, BS_GROUPBOX
+ LTEXT "-------------块--------------", -1, 141, 84, 78, 8
+ LTEXT "访问", -1, 9, 94, 27, 8
+ LTEXT "类型", -1, 40, 94, 23, 8
+ LTEXT "扇区", -1, 72, 94, 30, 8
+ LTEXT "偏移", -1, 112, 94, 24, 8
+ LTEXT "大小", -1, 140, 94, 22, 8
+ LTEXT "总数", -1, 165, 94, 25, 8
+ LTEXT "已分配", -1, 195, 94, 30, 8
+ LTEXT "文件", -1, 225, 94, 30, 8
+ LTEXT "只读", 206, 9, 106, 30, 8
+ LTEXT "稀疏", 207, 40, 106, 30, 8
+ LTEXT "4193792", 208, 72, 106, 38, 8
+ LTEXT "0", 209, 112, 106, 17, 8
+ LTEXT "0", 210, 140, 106, 20, 8
+ LTEXT "0", 211, 165, 106, 24, 8
+ LTEXT "0", 212, 195, 106, 25, 8
+ LTEXT "文本", 213, 225, 106, 192, 8, NOT WS_GROUP
+ DEFPUSHBUTTON "关闭(&C)", 2, 175, 189, 50, 14, BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP
+ LTEXT "只读", 214, 9, 115, 30, 8
+ LTEXT "稀疏", 215, 40, 115, 30, 8
+ LTEXT "4193792", 216, 72, 115, 38, 8
+ LTEXT "0", 217, 112, 115, 17, 8
+ LTEXT "0", 218, 140, 115, 20, 8
+ LTEXT "0", 219, 165, 115, 24, 8
+ LTEXT "0", 220, 195, 115, 25, 8
+ LTEXT "文本", 221, 225, 115, 192, 8, NOT WS_GROUP
+ LTEXT "只读", 222, 9, 124, 30, 8
+ LTEXT "稀疏", 223, 40, 124, 30, 8
+ LTEXT "4193792", 224, 72, 124, 38, 8
+ LTEXT "0", 225, 112, 124, 17, 8
+ LTEXT "0", 226, 140, 124, 20, 8
+ LTEXT "0", 227, 165, 124, 24, 8
+ LTEXT "0", 228, 195, 124, 25, 8
+ LTEXT "文本", 229, 225, 124, 192, 8, NOT WS_GROUP
+ LTEXT "只读", 230, 9, 133, 30, 8
+ LTEXT "稀疏", 231, 40, 133, 30, 8
+ LTEXT "4193792", 232, 72, 133, 38, 8
+ LTEXT "0", 233, 112, 133, 17, 8
+ LTEXT "0", 234, 140, 133, 20, 8
+ LTEXT "0", 235, 165, 133, 24, 8
+ LTEXT "0", 236, 195, 133, 25, 8
+ LTEXT "文本", 237, 225, 133, 192, 8, NOT WS_GROUP
+ LTEXT "只读", 238, 9, 142, 30, 8
+ LTEXT "稀疏", 239, 40, 142, 30, 8
+ LTEXT "4193792", 240, 72, 142, 38, 8
+ LTEXT "0", 241, 112, 142, 17, 8
+ LTEXT "0", 242, 140, 142, 20, 8
+ LTEXT "0", 243, 165, 142, 24, 8
+ LTEXT "0", 244, 195, 142, 25, 8
+ LTEXT "文本", 245, 225, 142, 192, 8, NOT WS_GROUP
+ LTEXT "只读", 246, 9, 151, 30, 8
+ LTEXT "稀疏", 247, 40, 151, 30, 8
+ LTEXT "4193792", 248, 72, 151, 38, 8
+ LTEXT "0", 249, 112, 151, 17, 8
+ LTEXT "0", 250, 140, 151, 20, 8
+ LTEXT "0", 251, 165, 151, 24, 8
+ LTEXT "0", 252, 195, 151, 25, 8
+ LTEXT "文本", 253, 225, 151, 192, 8, NOT WS_GROUP
+ LTEXT "只读", 254, 9, 160, 30, 8
+ LTEXT "稀疏", 255, 40, 160, 30, 8
+ LTEXT "4193792", 256, 72, 160, 38, 8
+ LTEXT "0", 257, 112, 160, 17, 8
+ LTEXT "0", 258, 140, 160, 20, 8
+ LTEXT "0", 259, 165, 160, 24, 8
+ LTEXT "0", 260, 195, 160, 25, 8
+ LTEXT "文本", 261, 225, 160, 192, 8, NOT WS_GROUP
+ LTEXT "只读", 262, 9, 169, 30, 8
+ LTEXT "稀疏", 263, 40, 169, 30, 8
+ LTEXT "4193792", 264, 72, 169, 38, 8
+ LTEXT "0", 265, 112, 169, 17, 8
+ LTEXT "0", 266, 140, 169, 20, 8
+ LTEXT "0", 267, 165, 169, 24, 8
+ LTEXT "0", 268, 195, 169, 25, 8
+ LTEXT "文本", 269, 225, 169, 192, 8, NOT WS_GROUP
+}
+
+DLG_WRITE_SECTORS_ZH_CN DIALOG 12, 22, 365, 110
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "将扇区写入文件..."
+FONT 9, "Microsoft YaHei UI"
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+{
+ GROUPBOX " 文件 ", -1, 3, 2, 354, 77, BS_GROUPBOX
+ LTEXT "起始扇区：", -1, 9, 15, 67, 8
+ EDITTEXT 200, 84, 13, 59, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ LTEXT "扇区数量：", -1, 9, 33, 71, 8
+ EDITTEXT 201, 84, 31, 59, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ LTEXT "文件名：", -1, 9, 50, 60, 8
+ EDITTEXT 202, 84, 48, 220, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ PUSHBUTTON "浏览(&B)...", 203, 307, 47, 45, 14, WS_GROUP | WS_TABSTOP
+ PUSHBUTTON "开始(&G)", 1, 251, 86, 50, 14, WS_GROUP | WS_TABSTOP
+ DEFPUSHBUTTON "取消(&C)", 2, 305, 86, 50, 14, BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP
+}
+
+DLG_ALT_SECTOR_VIEWER_ZH_CN DIALOG -4, 6, 519, 242
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "扇区查看器..."
+FONT 9, "Microsoft YaHei UI"
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+{
+ LTEXT "扇区：", 100, 5, 3, 131, 8, NOT WS_GROUP
+ CONTROL "", 200, "SSCCHexView", 0 | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_TABSTOP, 5, 14, 498, 191
+ SCROLLBAR 102, 503, 14, 12, 191, SBS_VERT | WS_GROUP
+ PUSHBUTTON "将扇区写入文件...", 300, 5, 218, 103, 14, WS_GROUP | WS_TABSTOP
+ RTEXT "转到扇区：", 400, 117, 221, 57, 8
+ EDITTEXT 103, 177, 219, 52, 12, WS_BORDER | WS_TABSTOP
+ PUSHBUTTON "转到", 301, 230, 218, 30, 14, WS_GROUP | WS_TABSTOP
+ PUSHBUTTON "以 MBR 查看", 302, 282, 218, 66, 14, WS_GROUP | WS_TABSTOP
+ PUSHBUTTON "关闭", 1, 463, 218, 50, 14, WS_GROUP | WS_TABSTOP
+ LTEXT "偏移：", 101, 138, 3, 65, 8, NOT WS_GROUP
+}
+
+STRINGTABLE
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+{
+ IDS_OK,              "确定"
+ IDS_NONE,            "无"
+ IDS_ERROR,           "错误"
+ IDS_UNKERROR,        "未知错误"
+ IDS_NOYES,           "否是"
+
+ IDS_DLG_CLONEVDI,          "DLG_CLONEVDI_ZH_CN"
+ IDS_DLG_ALT_PROGRESS,      "DLG_ALT_PROGRESS_ZH_CN"
+ IDS_DLG_PARTINFO,          "DLG_PARTINFO_ZH_CN"
+ IDS_DLG_VDI_HDR_INFO,      "DLG_VDI_HDR_INFO_ZH_CN"
+ IDS_DLG_VHD_HDR_INFO,      "DLG_VHD_HDR_INFO_ZH_CN"
+ IDS_DLG_HDD_HDR_INFO,      "DLG_HDD_HDR_INFO_ZH_CN"
+ IDS_DLG_VMDK_HDR_INFO,     "DLG_VMDK_HDR_INFO_ZH_CN"
+ IDS_DLG_WRITE_SECTORS,     "DLG_WRITE_SECTORS_ZH_CN"
+ IDS_DLG_ALT_SECTOR_VIEWER, "DLG_ALT_SECTOR_VIEWER_ZH_CN"
+
+ IDS_SELECT_SOURCE,   "选择源文件..."
+ IDS_SRCFILEFILTER,   "虚拟磁盘文件\000*.vdi;*.vhd;*.vmdk;*.raw;*.img;*.hdd\000\000"
+ IDS_SELECT_DEST,     "选择目标文件名..."
+ IDS_DSTFILEFILTER,   "虚拟磁盘文件\000*.vdi\000\000"
+ IDS_UNKNOWNFS,       "未知 (%02lx)"
+ IDS_PLSSELSRC,       "请选择源虚拟磁盘"
+ IDS_NOSRC,           "无法继续：源文件不存在！"
+ IDS_ERRAPPWND,       "无法创建程序窗口（错误 x%x）"
+ IDS_ENC_CLONE_WARN,  "检测到已加密或疑似加密的卷：\n\n%s\n\n克隆不会修改源文件，但 CloneVDI 无法分析加密文件系统。是否继续？"
+ IDS_ENC_INPLACE_WARN,"检测到已加密或疑似加密的卷：\n\n%s\n\n原地修改可能永久损坏此磁盘。仍要继续吗？"
+ IDS_INPLACE_CONFIRM, "此操作将直接修改源 VDI，不会创建完整备份。请先关闭所有虚拟机并自行备份。是否继续？"
+ IDS_RECOVER_CONFIRM, "检测到未完成的原地操作。在恢复日志处理完成前，源磁盘可能无法使用。是否立即继续恢复？"
+ IDS_RISK_TITLE,      "数据安全警告"
+ IDS_INPLACE_FAILED,  "原地修改失败：%s"
+ IDS_RECOVERY_FOUND,  "检测到未完成的原地操作，需要恢复"
+ IDS_ENC_CLI_WARN,    "警告：检测到已加密或疑似加密的卷：%s"
+ IDS_ENC_NOTSCANNED,  "尚未扫描"
+ IDS_ENC_NONE,        "未检测到加密"
+ IDS_ENC_INCOMPLETE,  "加密检测不完整"
+ IDS_ENC_PARTITION,   "%s%s（分区 %lu）"
+ IDS_ENC_SUSPECTED,   "【疑似】"
+ IDS_ENC_UNKNOWN,     "未知加密"
+
+ IDS_LOMEM,           "内存不足，无法分配复制缓冲区！"
+ IDS_FINDINGUSEDBLKS, "正在查找分区中已使用的块，请稍候..."
+ IDS_CLONINGVHD,      "正在克隆虚拟硬盘..."
+ IDS_CLONEWAIT,       "正在克隆虚拟磁盘，请稍候..."
+ IDS_USERABORT,       "用户已中止操作"
+ IDS_ORIGINAL,        "原始文件 "
+ IDS_SNAPSHOT,        "源文件是差分映像。抱歉，本工具目前无法克隆此类映像"
+ IDS_SIZEERR2,        "新磁盘大小必须是数字，并以 GB 或 MB 结尾以说明单位"
+ IDS_SIZEERR3,        "新磁盘大小的数字格式无效，或数值过大"
+ IDS_SIZEERR4,        "新磁盘大小不得小于原磁盘大小"
+ IDS_SIZEERR5,        "本工具无法创建大于 2047.00 GB 的虚拟磁盘"
+ IDS_BADNUM,          "新磁盘大小中包含无效数字"
+ IDS_ERRRENAME,       "无法重命名旧 VDI：目标备份文件已经存在。因此克隆文件将保留临时文件名“%s”"
+
+ IDS_USAGE00,         "\015\012用法：CloneVDI <源文件名> {选项}\015\012"
+ IDS_USAGE01,         "\015\012克隆选项：\015\012"
+ IDS_USAGE02,         "  -o, --output <文件>       设置输出 VDI 文件名。\015\012"
+ IDS_USAGE03,         "  -k, --keepuuid            保留源磁盘创建 UUID。\015\012"
+ IDS_USAGE04,         "  -e, --enlarge <大小>      增大虚拟容量（MB/GB）。\015\012"
+ IDS_USAGE05,         "  -r, --repart              同时增大主分区。\015\012"
+ IDS_USAGE06,         "  -c, --compact             丢弃受支持文件系统的未使用块。\015\012"
+ IDS_USAGE07,         "\015\012原地修改选项：\015\012"
+ IDS_USAGE08,         "  -i, --inplace             直接修改受支持的源 VDI。\015\012"
+ IDS_USAGE09,         "      --force-encrypted     加密警告后仍允许原地修改。\015\012"
+ IDS_USAGE10,         "      --resume              继续未完成的原地恢复日志。\015\012"
+ IDS_USAGE11,         "\015\012"
+ IDS_USAGE12,         "原地模式仅支持独立动态 VDI 1.1 的压缩和虚拟容量增大；\015\012"
+ IDS_USAGE13,         "不能与 output、keepuuid 或 repart 组合使用。\015\012"
+ IDS_USAGE14,         "成功完成后会自动删除小型恢复日志。\015\012"
+ IDS_USAGE15,         "\015\012"
+ IDS_USAGE16,         "  -h, --help                显示此帮助信息。\015\012"
+ IDS_USAGE17,         "\015\012"
+ IDS_USAGE18,         "短选项可以组合；带参数的选项按组合顺序取值。\015\012"
+ IDS_USAGE19,         "使用 --inplace 前请关闭所有虚拟机并备份源磁盘。\015\012"
+ IDS_BANNER0,         "\015\012CloneVDI %lu.%02lx\015\012"
+ IDS_BANNER1,         "版权所有 (C) %lu，Don Milne\015\012"
+ IDS_BANNER2,         "反馈请联系 VirtualBox 论坛用户 mpack\015\012"
+ IDS_ARGERR,          "参数 %lu 错误：%s。\015\012"
+ IDS_OPTTWICE,        "参数 %lu 错误：选项 %s 被指定了两次。\015\012"
+ IDS_NOFILEN,         "指定了 output 选项，但未提供文件名"
+ IDS_NODSIZE,         "指定了 enlarge 选项，但未提供磁盘大小"
+ IDS_UNKOPT,          "未知选项"
+ IDS_INVOPT,          "选项格式无效（是否包含空格？）"
+ IDS_SRCTWICE,        "源文件名似乎指定了两次；目标文件应使用 --output <文件名> 指定"
+ IDS_NEEDSRC,         "缺少源文件名"
+ IDS_INPLACECONFLICT, "--inplace 不能与 --output、--keepuuid 或 --repart 同时使用"
+ IDS_INPLACENEEDSOP,  "--inplace 需要同时指定 --compact 或 --enlarge"
+ IDS_FORCECONFLICT,   "--force-encrypted 只能与 --inplace 一起使用"
+ IDS_RESUMECONFLICT,  "--resume 不能与克隆或修改选项同时使用"
+ IDS_VOPTOUTPUT,      "output"
+ IDS_VOPTKEEPUUID,    "keepuuid"
+ IDS_VOPTENLARGE,     "enlarge"
+ IDS_VOPTCOMPACT,     "compact"
+ IDS_VOPTHELP,        "help"
+ IDS_CHAROPT,         "okechri"
+
+ IDS_CLONEOF,         "克隆 - "
+
+ IDS_SVOFFSET,        "偏移 = %lu"
+ IDS_SVSECTOR,        "第 %lu 个扇区，共 %lu 个"
+ IDS_SVDESTFN,        "选择目标文件名..."
+ IDS_SVBINFLT,        "二进制文件\000*.bin\000\000"
+ IDS_SVPEVALSS,       "请输入有效的起始扇区"
+ IDS_SVPEVALSW,       "请输入有效的写入扇区数"
+ IDS_SVNOSPACE,       "目标文件夹的可用空间不足"
+ IDS_SVINVPATH,       "路径无效"
+ IDS_SVACCDEN,        "写入访问被拒绝"
+ IDS_SVWRPROT,        "目标驱动器已写保护"
+ IDS_SVOVERWR,        "目标文件已存在，确定要覆盖吗？"
+ IDS_SVEXISTS,        "文件已存在"
+ IDS_SVLOWMEM,        "内存不足，无法分配复制缓冲区！"
+ IDS_SVWRSECT,        "正在写入扇区，请稍候..."
+ IDS_SVPRCAPT,        "正在写入扇区..."
+ IDS_SVWRERR,         "写入错误！"
+ IDS_SVABORT,         "用户已中止操作"
+
+ IDS_DYNAMIC,         "动态"
+ IDS_FIXED,           "固定"
+ IDS_UNDO,            "撤销"
+ IDS_DIFFERENCING,    "差分"
+ IDS_SET,             "已设置"
+ IDS_NOTSET,          "未设置"
+ IDS_NOTSPEC,         "未指定"
+ IDS_ACCTYPE0,        "?"
+ IDS_ACCTYPE1,        "读写"
+ IDS_ACCTYPE2,        "只读"
+ IDS_ACCTYPE3,        "无"
+ IDS_EXTTYPE0,        "?"
+ IDS_EXTTYPE1,        "平面"
+ IDS_EXTTYPE2,        "稀疏"
+ IDS_EXTTYPE3,        "零"
+
+ IDS_VDNOEXIST,       "源文件不存在"
+ IDS_VDERRSHARE,      "源文件正在使用中（VirtualBox 是否仍在运行？）"
+ IDS_VDERRREAD,       "读取源文件时发生操作系统错误 %lu"
+ IDS_VDNOTVDI,        "源文件不是可识别的 VDI 文件格式"
+ IDS_VDNOTVHD,        "源文件不是可识别的 VHD 文件格式"
+ IDS_VDNOTVMDK,       "源文件不是可识别的 VMDK 文件格式"
+ IDS_VDNOTHDD,        "源文件不是可识别的 HDD 文件格式"
+ IDS_VDINVHANDLE,     "传给 VDx 源对象的句柄无效"
+ IDS_VDNOMEM,         "内存不足，无法映射源文件"
+ IDS_VDSEEKRANGE,     "程序试图定位到磁盘末尾之外！"
+ IDS_VDERRFMT,        "源文件格式异常，与本工具不兼容"
+ IDS_VDERRSEEK,       "在源文件中定位时发生操作系统错误 %lu"
+ IDS_VDBLKMAP,        "源文件已损坏：块映射包含错误"
+ IDS_VDNODESC,        "VMDK 不完整：找不到磁盘描述符"
+ IDS_VDINVDESC,       "VMDK 磁盘描述符无效"
+ IDS_VDBADVER,        "无法识别 VMDK 版本号"
+ IDS_VDMISSING,       "VMDK 描述符缺少必要参数"
+ IDS_VDERRCOMP,       "当前不支持压缩的 VMDK"
+ IDS_VDNOEXTENT,      "描述符引用的分片文件缺失（是否被重命名？）"
+
+ IDS_VWERRPATH,       "目标路径不存在"
+ IDS_VWEXISTS,        "目标文件已经存在"
+ IDS_VWNOSPACE,       "目标驱动器的可用空间不足"
+ IDS_VWWRPROT,        "目标驱动器已写保护"
+ IDS_VWACCDEN,        "访问目标驱动器被拒绝"
+ IDS_VWNOMEM,         "内存不足"
+ IDS_VWWRERR,         "磁盘写入错误"
+ IDS_VWBLOCK,         "试图在虚拟磁盘末尾之外写入块"
+ IDS_VWEXISTSQ,       "目标文件已存在，确定要覆盖吗？"
+ IDS_VWEXISTSC,       "文件已存在"
+
+ IDS_COW_INVHANDLE,   "传给 COW 模块的句柄无效"
+ IDS_COW_OUTOFMEM,    "内存分配失败：内存不足"
+ IDS_COW_INVBLOCK,    "程序试图定位到磁盘末尾之外！"
+ IDS_COW_SEEK,        "在源磁盘中定位时发生操作系统错误 %lu"
+ IDS_COW_READ,        "读取源磁盘时发生操作系统错误 %lu"
+ IDS_COW_INVALIDMOVE, "COW_MoveSectors 操作无效"
+}

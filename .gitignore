@@ -1,0 +1,33 @@
+# Build outputs and intermediate files
+Debug/
+Release/
+Obj/
+Source Release/
+*.obj
+*.exe
+*.dll
+*.lib
+*.exp
+*.pdb
+*.idb
+*.ilk
+*.res
+*.tlog/
+*.log
+
+# Visual Studio per-user files
+*.user
+*.suo
+*.ncb
+*.VC.db
+*.VC.VC.opendb
+.vs/
+
+# Per-user application settings (recent paths and language preference)
+VDI-Tools.ini
+
+# Generated image source; the final PNG and ICO are versioned.
+Resource/icons/VDI-Tools-source.png
+
+# Local UI smoke-test disk image
+ui-detail-smoke.vdi
