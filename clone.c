@@ -152,7 +152,7 @@ MapPartitions(HFSYS fsMap[MAX_MAPPED_PARTITIONS], s_CLONEPARMS *parm)
                HUGE entriesLBA = ReadLe64(gptHdr+72);
                UINT nEntries   = ReadLe32(gptHdr+80);
                UINT cbEntry    = ReadLe32(gptHdr+84);
-               if (entriesLBA>0 && nEntries>0 && cbEntry>=128 && cbEntry<=512) {
+               if (entriesLBA>0 && nEntries>0 && cbEntry>=128 && cbEntry<=512 && (512%cbEntry)==0) {
                   BYTE secBuffer[512];
                   UINT perSec = 512 / cbEntry;
                   if (nEntries > 128) nEntries = 128;
@@ -490,7 +490,10 @@ Clone_Proceed(HINSTANCE hInstRes, HWND hWndParent, s_CLONEPARMS *parm)
       lstrcpy(szfnDest, parm->dstfn);
    }
 
+   Task_MediaRegistryEnter();
+   VDDR_OpenMediaRegistry(szfnSrc);
    SourceDisk = VDDR_Open(szfnSrc,0);
+   Task_MediaRegistryLeave();
    if (!SourceDisk) return Error(VDDR_GetErrorString(0xFFFFFFFF));
    if (IsSnapshot(SourceDisk) || !DestSizeOK(SourceDisk,parm)) {
       SourceDisk->Close(SourceDisk);

@@ -12,6 +12,26 @@
 #include "djstring.h"
 
 static __declspec(thread) VDI_JOB *CurrentJob;
+static INIT_ONCE MediaRegistryOnce=INIT_ONCE_STATIC_INIT;
+static CRITICAL_SECTION MediaRegistryLock;
+
+static BOOL CALLBACK InitMediaRegistryLock(PINIT_ONCE once, PVOID parameter, PVOID *context)
+{
+   (void)once; (void)parameter; (void)context;
+   InitializeCriticalSection(&MediaRegistryLock);
+   return TRUE;
+}
+
+void Task_MediaRegistryEnter(void)
+{
+   InitOnceExecuteOnce(&MediaRegistryOnce,InitMediaRegistryLock,NULL,NULL);
+   EnterCriticalSection(&MediaRegistryLock);
+}
+
+void Task_MediaRegistryLeave(void)
+{
+   LeaveCriticalSection(&MediaRegistryLock);
+}
 
 BOOL Task_CurrentCancelRequested(void)
 {
@@ -64,14 +84,21 @@ static BOOL Exists(CPFN filename)
 
 static BOOL ScanEncryption(VDI_JOB *job)
 {
-   HVDDR disk=VDDR_Open(job->parm.srcfn,0);
+   HVDDR disk;
+   BOOL ok=FALSE;
+   Task_MediaRegistryEnter();
+   VDDR_OpenMediaRegistry(job->parm.srcfn);
+   disk=VDDR_Open(job->parm.srcfn,0);
    if (!disk) {
       lstrcpyn(job->error,VDDR_GetErrorString(0xFFFFFFFF),sizeof(job->error));
+      Task_MediaRegistryLeave();
       return FALSE;
    }
    Encryption_Scan(disk,&job->encryption);
    disk->Close(disk);
-   return TRUE;
+   ok=TRUE;
+   Task_MediaRegistryLeave();
+   return ok;
 }
 
 static void RunOne(VDI_TASK_BATCH *batch, VDI_JOB *job)

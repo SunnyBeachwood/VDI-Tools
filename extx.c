@@ -75,20 +75,36 @@ ReadClusters(PEXTXVOL pExt2, PVOID dest, HUGE LCN, UINT nClusters)
 #if DUMP_BLOCK_GROUPS
 
 static char sz[1024];
-static BGD  bgd[32]; // 1024 bytes.
+
+static UINT
+GetDescSize(SUPERBLK *psblk)
+{
+   UINT desc_size = 32;
+   if (psblk->s_desc_size >= 32 && (psblk->s_desc_size & (psblk->s_desc_size - 1)) == 0 && psblk->s_desc_size <= 1024) {
+      desc_size = psblk->s_desc_size;
+   } else if (psblk->s_feature_incompat & EXT4_FEATURE_INCOMPAT_64BIT) {
+      desc_size = 64;
+   }
+   return desc_size;
+}
 
 static void
 DumpBlockInfo(HVDDR hVDI, HUGE iLBA, SUPERBLK *sblk, UINT *Bitmap)
 {
    HMEMFILE f = MemFile.Create(0);
    FILE fb;
+   UINT desc_size = GetDescSize(sblk);
    UINT nBlockGroups = (sblk->s_blocks_count + (sblk->s_blocks_per_group-1)) / sblk->s_blocks_per_group;
    UINT nLastGroupClust = sblk->s_blocks_count % sblk->s_blocks_per_group;
    UINT i,j,k,grpbase,tmp,BlocksInGroup,bgdt_block;
+   PBYTE pBGDBuff;
    
    if (!nLastGroupClust) nLastGroupClust = sblk->s_blocks_per_group;
    if (sblk->s_log_block_size==0) bgdt_block = 2;
    else bgdt_block = 1;
+   
+   pBGDBuff = (PBYTE)Mem_Alloc(0, 32 * desc_size);
+   if (!pBGDBuff) { MemFile.Close(f); return; }
    
    M_PRINTF(f, "\r\nEXT2 Partition Info\r\n");
    M_PRINTF(f, "===================\r\n");
@@ -98,6 +114,7 @@ DumpBlockInfo(HVDDR hVDI, HUGE iLBA, SUPERBLK *sblk, UINT *Bitmap)
    M_PRINTF1(f,"Clusters per group         : %lu\r\n", sblk->s_blocks_per_group);
    M_PRINTF1(f,"Clusters in last group     : %lu\r\n", nLastGroupClust);
    M_PRINTF1(f,"Inodes per group           : %lu\r\n", sblk->s_inodes_per_group);
+   M_PRINTF1(f,"Descriptor size            : %lu\r\n", desc_size);
    M_PRINTF1(f,"Block Group Table in block : %lu\r\n", bgdt_block);
    
    M_PRINTF(f, "\r\nBlock Group Descriptor Table\r\n");
@@ -107,15 +124,22 @@ DumpBlockInfo(HVDDR hVDI, HUGE iLBA, SUPERBLK *sblk, UINT *Bitmap)
    M_PRINTF(f,"-------  --------  --------  --------  --------  --------  --------  ------  --------------\r\n");
    iLBA += (bgdt_block * (2<<sblk->s_log_block_size));
    for (i=0; i<nBlockGroups; i+=32) {
+      UINT nSectorsToRead;
       BlocksInGroup = 32;
       if ((i+32)>nBlockGroups) BlocksInGroup = nBlockGroups - i;
-      hVDI->ReadSectors(hVDI, bgd, iLBA, 2);
+      nSectorsToRead = (BlocksInGroup * desc_size + 511) / 512;
+      hVDI->ReadSectors(hVDI, pBGDBuff, iLBA, nSectorsToRead);
       for (j=0; j<BlocksInGroup; j++) {
+         PBYTE pDesc = pBGDBuff + j * desc_size;
+         UINT bm_lo = *(PUINT)(pDesc + 0);
+         UINT ibm_lo = *(PUINT)(pDesc + 4);
+         UINT itbl_lo = *(PUINT)(pDesc + 8);
+         WORD free_b = *(PWORD)(pDesc + 12);
+         WORD free_i = *(PWORD)(pDesc + 14);
+         WORD used_d = *(PWORD)(pDesc + 16);
          Env_sprintf(sz,"%7lu%10lu%10lu%10lu%10lu%10lu%10lu%8lu  ",
                   i+j,(i+j)*sblk->s_blocks_per_group,
-                  bgd[j].bg_block_bitmap, bgd[j].bg_inode_bitmap,
-                  bgd[j].bg_inode_table, bgd[j].bg_free_blocks_count,
-                  bgd[j].bg_free_inodes_count, bgd[j].bg_used_dirs_count);
+                  bm_lo, ibm_lo, itbl_lo, free_b, free_i, used_d);
          MemFile.WrBin(f,sz,String_Length(sz));
          grpbase = (i+j)*sblk->s_blocks_per_group;
          for (k=0; k<64; k++) {
@@ -127,13 +151,28 @@ DumpBlockInfo(HVDDR hVDI, HUGE iLBA, SUPERBLK *sblk, UINT *Bitmap)
          sz[65] = '\n';
          MemFile.WrBin(f,sz,66);
       }
-      iLBA += 2;
+      iLBA += nSectorsToRead;
    }
    
+   Mem_Free(pBGDBuff);
    fb = File_Create("ext2info.txt",TRUE);
    File_WrBin(fb,MemFile.GetPtr(f,0),MemFile.Size(f));
    File_Close(fb);
    MemFile.Close(f);
+}
+
+#else
+
+static UINT
+GetDescSize(SUPERBLK *psblk)
+{
+   UINT desc_size = 32;
+   if (psblk->s_desc_size >= 32 && (psblk->s_desc_size & (psblk->s_desc_size - 1)) == 0 && psblk->s_desc_size <= 1024) {
+      desc_size = psblk->s_desc_size;
+   } else if (psblk->s_feature_incompat & EXT4_FEATURE_INCOMPAT_64BIT) {
+      desc_size = 64;
+   }
+   return desc_size;
 }
 
 #endif
@@ -161,16 +200,18 @@ Extx_IsLinuxVolume(HVDDR hVDI, HUGE iLBA)
 static BOOL
 ReadBitmap(PEXTXVOL pExt2)
 {
-   UINT i,bgdt_block,bgdt_size_clusters;
-   PBGD pBGDT;
+   UINT i,bgdt_block,bgdt_size_clusters,desc_size;
+   PBYTE pBGDT;
    
-  // Calculate the LCN of the block group descriptor table, and its size in clusters.
+   desc_size = GetDescSize(&pExt2->sblk);
+
+   // Calculate the LCN of the block group descriptor table, and its size in clusters.
    if (pExt2->sblk.s_log_block_size==0) bgdt_block = 2;
    else bgdt_block = 1;
-   bgdt_size_clusters = (pExt2->nBlockGroups*32 + (pExt2->ClusterSize-1))/pExt2->ClusterSize;
+   bgdt_size_clusters = (pExt2->nBlockGroups*desc_size + (pExt2->ClusterSize-1))/pExt2->ClusterSize;
    
    // allocate memory for the block group table, then read it.
-   pBGDT = Mem_Alloc(0,bgdt_size_clusters*pExt2->ClusterSize);
+   pBGDT = (PBYTE)Mem_Alloc(0,bgdt_size_clusters*pExt2->ClusterSize);
    if (pBGDT && ReadClusters(pExt2,pBGDT,bgdt_block,bgdt_size_clusters)!=VDDR_RSLT_FAIL) {
          
       // allocate the bitmap memory for the entire partition.
@@ -179,8 +220,17 @@ ReadBitmap(PEXTXVOL pExt2)
          BYTE *pDest = (BYTE*)pExt2->Bitmap;
          // Read the individual bitmap blocks;
          for (i=0; i<pExt2->nBlockGroups; i++) {
-            if (ReadClusters(pExt2,pDest,pBGDT[i].bg_block_bitmap,1)==VDDR_RSLT_FAIL) {
+            PBYTE pDesc = pBGDT + i * desc_size;
+            UINT lo = *(PUINT)(pDesc + 0); // bg_block_bitmap
+            UINT hi = 0;
+            HUGE lcn;
+            if (desc_size >= 64 && (pExt2->sblk.s_feature_incompat & EXT4_FEATURE_INCOMPAT_64BIT)) {
+               hi = *(PUINT)(pDesc + 0x20); // bg_block_bitmap_hi
+            }
+            lcn = MAKEHUGE(lo, hi);
+            if (ReadClusters(pExt2,pDest,lcn,1)==VDDR_RSLT_FAIL) {
                Mem_Free(pExt2->Bitmap);
+               pExt2->Bitmap = NULL;
                goto _err_abort;
             }
             pDest += pExt2->ClusterSize;
@@ -203,6 +253,7 @@ Extx_OpenVolume(HVDDR hVDI, HUGE iLBA, HUGE cLBA, UINT cSectorSize)
       PEXTXVOL pExt2 = Mem_Alloc(MEMF_ZEROINIT, sizeof(EXTXVOLINF));
       if (pExt2) {
          HUGE volume_sectors;
+         HUGE total_blocks;
          
          pExt2->Base.CloseVolume = Extx_CloseVolume;
          pExt2->Base.IsBlockUsed = Extx_IsBlockUsed;
@@ -210,17 +261,23 @@ Extx_OpenVolume(HVDDR hVDI, HUGE iLBA, HUGE cLBA, UINT cSectorSize)
          
          pExt2->hVDIsrc = hVDI;
          
-         pExt2->nBlockGroups = (pExt2->sblk.s_blocks_count + (pExt2->sblk.s_blocks_per_group-1)) /
-                               pExt2->sblk.s_blocks_per_group;
+         hugeop_fromuint(total_blocks, pExt2->sblk.s_blocks_count);
+         if ((pExt2->sblk.s_feature_incompat & EXT4_FEATURE_INCOMPAT_64BIT) && pExt2->sblk.s_blocks_count_hi) {
+            HUGE hi_blocks;
+            hugeop_fromuint(hi_blocks, pExt2->sblk.s_blocks_count_hi);
+            hugeop_shl(hi_blocks, hi_blocks, 32);
+            hugeop_add(total_blocks, total_blocks, hi_blocks);
+         }
+         
+         pExt2->nBlockGroups = (UINT)((total_blocks + (pExt2->sblk.s_blocks_per_group-1)) /
+                               pExt2->sblk.s_blocks_per_group);
          pExt2->ClusterSize = (1024<<pExt2->sblk.s_log_block_size);
          pExt2->SectorsPerClusterShift = PowerOfTwo((pExt2->ClusterSize>>9));
          pExt2->BlockGroupSizeBytes = pExt2->sblk.s_blocks_per_group*pExt2->ClusterSize;
          pExt2->VolumeBaseLBA = iLBA;
          
-         // calculate end sector address. We don't use cLBA because ext2 partitions ignore
-         // the residue left by dividing cLBA/SectorsPerCluster, and it's possible someone
-         // could store something in the residue.
-         hugeop_fromuint(volume_sectors, pExt2->sblk.s_blocks_count);
+         // calculate end sector address.
+         volume_sectors = total_blocks;
          hugeop_shl(volume_sectors, volume_sectors, pExt2->SectorsPerClusterShift);
          hugeop_add(pExt2->LastSectorLBA,pExt2->VolumeBaseLBA,volume_sectors);
          

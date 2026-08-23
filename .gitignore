@@ -31,3 +31,7 @@ Resource/icons/VDI-Tools-source.png
 
 # Local UI smoke-test disk image
 ui-detail-smoke.vdi
+*.vdi
+VDI/
+qemu.sha512
+图片/

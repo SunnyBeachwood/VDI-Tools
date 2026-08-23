@@ -56,30 +56,34 @@ static unsigned long Read32(const BYTE *p)
 
 static void SetOverview(HWND dlg, DETAILS_CONTEXT *c)
 {
-   char text[4096],size[128];
+   char text[4096],size[128],capacity[128];
    HUGE bytes=0;
+   BOOL capacityAvailable;
    LARGE_INTEGER physical;
    HANDLE file;
-   c->disk->GetDriveSize(c->disk,&bytes);
+   capacityAvailable=c->disk->GetDriveSize(c->disk,&bytes);
    file=CreateFile(c->filename,GENERIC_READ,FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,0,NULL);
    if (file!=INVALID_HANDLE_VALUE && GetFileSizeEx(file,&physical)) {
       wsprintf(size,"%I64u bytes",physical.QuadPart);
    } else lstrcpy(size,"Unavailable");
    if (file!=INVALID_HANDLE_VALUE) CloseHandle(file);
    if (c->chinese) {
-      WCHAR output[4096],fileW[1024],typeW[64],sizeW[128];
-      ToWide(fileW,sizeof(fileW)/sizeof(fileW[0]),c->filename); ToWide(typeW,sizeof(typeW)/sizeof(typeW[0]),DriveTypeName(c->disk->GetDriveType(c->disk))); ToWide(sizeW,sizeof(sizeW)/sizeof(sizeW[0]),size);
-      wsprintfW(output,L"\x6982\x89C8\r\n\r\n\x6587\x4EF6: %s\r\n\x683C\x5F0F: %s\r\n\x865A\x62DF\x5BB9\x91CF: %I64u bytes\r\n\x5B9E\x9645\x6587\x4EF6\x5927\x5C0F: %s\r\n\r\n\x6B64\x7A97\x53E3\x4EE5\x53EA\x8BFB\x65B9\x5F0F\x6253\x5F00\x78C1\x76D8\x3002\x53EF\x5728\x5176\x4ED6\x6807\x7B7E\x9875\x67E5\x770B\x5E03\x5C40\x548C\x5143\x6570\x636E\x3002",fileW,typeW,(unsigned long long)bytes,sizeW);
+       WCHAR output[4096],fileW[1024],typeW[64],sizeW[128],capacityW[128];
+       ToWide(fileW,sizeof(fileW)/sizeof(fileW[0]),c->filename); ToWide(typeW,sizeof(typeW)/sizeof(typeW[0]),DriveTypeName(c->disk->GetDriveType(c->disk))); ToWide(sizeW,sizeof(sizeW)/sizeof(sizeW[0]),size);
+       if (capacityAvailable) wsprintf(capacity,"%I64u bytes",(unsigned long long)bytes); else lstrcpy(capacity,"Unavailable");
+       ToWide(capacityW,sizeof(capacityW)/sizeof(capacityW[0]),capacity);
+       wsprintfW(output,L"\x6982\x89C8\r\n\r\n\x6587\x4EF6: %s\r\n\x683C\x5F0F: %s\r\n\x865A\x62DF\x5BB9\x91CF: %s\r\n\x5B9E\x9645\x6587\x4EF6\x5927\x5C0F: %s\r\n\r\n\x6B64\x7A97\x53E3\x4EE5\x53EA\x8BFB\x65B9\x5F0F\x6253\x5F00\x78C1\x76D8\x3002\x53EF\x5728\x5176\x4ED6\x6807\x7B7E\x9875\x67E5\x770B\x5E03\x5C40\x548C\x5143\x6570\x636E\x3002",fileW,typeW,capacityW,sizeW);
       SetDlgItemTextW(dlg,IDD_TEXT,output); return;
    }
+   if (capacityAvailable) wsprintf(capacity,"%I64u bytes",(unsigned long long)bytes); else lstrcpy(capacity,"Unavailable");
    wsprintf(text,
       "OVERVIEW\r\n\r\n"
       "File: %s\r\n"
       "Format: %s\r\n"
-      "Virtual capacity: %I64u bytes\r\n"
+      "Virtual capacity: %s\r\n"
       "Physical file size: %s\r\n\r\n"
       "This window opens the disk read-only. Use the other tabs to inspect layout and metadata.",
-      c->filename,DriveTypeName(c->disk->GetDriveType(c->disk)),(unsigned long long)bytes,size);
+      c->filename,DriveTypeName(c->disk->GetDriveType(c->disk)),capacity,size);
    SetDlgItemText(dlg,IDD_TEXT,text);
 }
 
@@ -107,7 +111,7 @@ static void SetPartitions(HWND dlg, DETAILS_CONTEXT *c)
          unsigned long cbEntry  = Read32(gptHdr+84);
          lstrcatW(output,L"\x68C0\x6D4B\x5230 GPT \x5206\x533A\x8868 (GUID Partition Table)\x3002\r\n\r\n");
          lstrcatW(output,L"\x7F16\x53F7  \x540D\x79F0  \x8D77\x59CB LBA  \x7ED3\x675F LBA  \x6247\x533A\x6570\r\n");
-         if (entriesLBA>0 && nEntries>0 && cbEntry>=128 && cbEntry<=512) {
+         if (entriesLBA>0 && nEntries>0 && cbEntry>=128 && cbEntry<=512 && (512%cbEntry)==0) {
             BYTE secBuffer[512];
             UINT perSec = 512 / cbEntry;
             UINT count = 0;
@@ -152,7 +156,7 @@ static void SetPartitions(HWND dlg, DETAILS_CONTEXT *c)
       unsigned long cbEntry  = Read32(gptHdr+84);
       lstrcat(text,"GPT Partition Table (GUID Partition Table) detected.\r\n\r\n");
       lstrcat(text,"#  Name  Start LBA  End LBA  Sectors\r\n");
-      if (entriesLBA>0 && nEntries>0 && cbEntry>=128 && cbEntry<=512) {
+      if (entriesLBA>0 && nEntries>0 && cbEntry>=128 && cbEntry<=512 && (512%cbEntry)==0) {
          BYTE secBuffer[512];
          UINT perSec = 512 / cbEntry;
          UINT count = 0;

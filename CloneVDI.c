@@ -409,6 +409,25 @@ static void RefreshBatchList(HWND hDlg)
    InvalidateRect(list, NULL, FALSE);
 }
 
+static void RefreshLegacyBatchList(HWND hDlg)
+{
+   HWND list=GetDlgItem(hDlg,IDB_LIST);
+   UINT i;
+   if (!list) return;
+   SendMessageA(list,LB_RESETCONTENT,0,0);
+   for (i=0;i<batchUI.count;i++) SendMessageA(list,LB_ADDSTRING,0,(LPARAM)batchUI.jobs[i].parm.srcfn);
+}
+
+static void RefreshQueueList(HWND hDlg)
+{
+   HWND list=GetDlgItem(hDlg,IDB_LIST);
+   char className[32];
+   if (!list) return;
+   GetClassNameA(list,className,sizeof(className));
+   if (lstrcmpiA(className,"ListBox")==0) RefreshLegacyBatchList(hDlg);
+   else RefreshBatchList(hDlg);
+}
+
 static void ApplyTheme(HWND hDlg, BOOL persist)
 {
    const APP_THEME *theme=&themes[themeIndex];
@@ -547,7 +566,7 @@ static void AddBatchFiles(HWND hDlg, const s_CLONEPARMS *base)
       if (p==names) break;
       p+=lstrlen(p)+1;
    }
-   RefreshBatchList(hDlg);
+   RefreshQueueList(hDlg);
 }
 
 static BOOL BatchCanStart(HWND hDlg)
@@ -596,7 +615,7 @@ static BOOL CALLBACK BatchDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPA
                if (!batchUI.started && index!=LB_ERR) {
                   UINT i=(UINT)index;
                   for (;i+1<batchUI.count;i++) batchUI.jobs[i]=batchUI.jobs[i+1];
-                  batchUI.count--; RefreshBatchList(hDlg);
+                  batchUI.count--; RefreshQueueList(hDlg);
                }
                return TRUE;
             }
@@ -608,7 +627,7 @@ static BOOL CALLBACK BatchDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPA
                if (!BatchCanStart(hDlg)) return TRUE;
                if (!TaskBatch_Start(&batchUI.task,batchUI.jobs,batchUI.count,threads,BatchNotify,hDlg)) { MessageBox(hDlg,"Could not start the batch worker threads.",RSTR(ERROR),MB_ICONEXCLAMATION|MB_OK); return TRUE; }
                batchUI.started=TRUE; EnableWindow(GetDlgItem(hDlg,IDB_ADD),FALSE); EnableWindow(GetDlgItem(hDlg,IDB_REMOVE),FALSE); EnableWindow(GetDlgItem(hDlg,IDB_START),FALSE);
-               SetTimer(hDlg,1,250,NULL); RefreshBatchList(hDlg); return TRUE;
+               SetTimer(hDlg,1,250,NULL); RefreshQueueList(hDlg); return TRUE;
             }
             case IDB_CANCELALL:
                if (batchUI.started) TaskBatch_RequestCancelAll(&batchUI.task);
@@ -619,9 +638,9 @@ static BOOL CALLBACK BatchDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPA
          }
          break;
       case WM_BATCH_UPDATE:
-         RefreshBatchList(hDlg); return TRUE;
+         RefreshQueueList(hDlg); return TRUE;
       case WM_TIMER:
-         RefreshBatchList(hDlg);
+         RefreshQueueList(hDlg);
          if (batchUI.started && TaskBatch_IsComplete(&batchUI.task)) {
             KillTimer(hDlg,1); TaskBatch_Destroy(&batchUI.task); batchUI.started=FALSE;
             EnableWindow(GetDlgItem(hDlg,IDB_CANCELALL),FALSE);
@@ -1032,7 +1051,14 @@ RunBatchCommandLine(s_CLONEPARMS *base)
    VDI_JOB *jobs;
    VDI_TASK_BATCH batch;
    FILE err=(FILE)GetStdHandle(STD_ERROR_HANDLE);
-   if (count<2) return DoItForHeavensSake(NULL) ? 0 : 1;
+   if (count<2) {
+      if (count==1 && outputDir) {
+         FNCHAR tail[1024];
+         Filename_SplitTail(base->dstfn,tail);
+         Filename_MakePath(base->dstfn,outputDir,tail);
+      }
+      return DoItForHeavensSake(NULL) ? 0 : 1;
+   }
    jobs=(VDI_JOB*)HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,sizeof(VDI_JOB)*count);
    if (!jobs) return 1;
    for (i=0;i<count;i++) {

@@ -331,7 +331,7 @@ static UINT MapPartitions(HVDDR disk, HFSYS fs[MAX_MAPPED_PARTITIONS])
          HUGE entriesLBA = ReadLe64(gptHdr+72);
          UINT nEntries   = ReadLe32(gptHdr+80);
          UINT cbEntry    = ReadLe32(gptHdr+84);
-         if (entriesLBA>0 && nEntries>0 && cbEntry>=128 && cbEntry<=512) {
+         if (entriesLBA>0 && nEntries>0 && cbEntry>=128 && cbEntry<=512 && (512%cbEntry)==0) {
             BYTE secBuffer[512];
             UINT perSec = 512 / cbEntry;
             if (nEntries > 128) nEntries = 128;
@@ -448,7 +448,10 @@ static BOOL Analyze(VDIIP_CONTEXT *c, s_CLONEPARMS *parm)
    HUGE oldSectors;
 
    Mem_Zero(c,sizeof(*c)); lstrcpyn(c->source,parm->srcfn,2048); JournalName(c->journal,c->source);
+   Task_MediaRegistryEnter();
+   VDDR_OpenMediaRegistry(c->source);
    disk=VDDR_Open(c->source,0);
+   Task_MediaRegistryLeave();
    if (!disk) { SetError(VDDR_GetErrorString(0xFFFFFFFF)); return FALSE; }
    if (disk->GetDriveType(disk)!=VDD_TYPE_VDI || !VDIR_GetHeader(disk,&ph,&h)) {
       disk->Close(disk); SetError("In-place mode supports VDI files only."); return FALSE;

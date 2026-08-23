@@ -11,13 +11,15 @@
 
 #define EXT2_SUPER_MAGIC               0xEF53
 #define EXT4_FEATURE_INCOMPAT_EXTENTS  0x0040
+#define EXT4_FEATURE_INCOMPAT_64BIT    0x0080
+#define EXT4_FEATURE_INCOMPAT_FLEX_BG  0x0200
 
 #pragma pack(push,1)
 
 // superblock structure
 typedef struct {
    UINT s_inodes_count;
-   UINT s_blocks_count;      // ** This is total number of blocks (clusters) in system. Note 32bit limit.
+   UINT s_blocks_count;      // ** This is total number of blocks (clusters) in system. Note 32bit limit (lower 32-bits in 64-bit mode).
    UINT s_r_blocks_count;    // reserved (for super user) blocks count.
    UINT s_free_blocks_count;
    UINT s_free_inodes_count;
@@ -67,15 +69,28 @@ typedef struct {
 
    // -- Directory Indexing Support --
    UINT s_hash_seed[4];
-   BYTE s_def_hash_version[4]; // hash version in low byte only.
+   BYTE s_def_hash_version;   // default hash version
+   BYTE s_jnl_backup_type;
+   WORD s_desc_size;          // size of group descriptor (32 or 64 bytes)
 
    // -- Other options --
    UINT s_default_mount_options;
    UINT s_first_meta_bg;
-   BYTE reserved[760]; // Reserved for future filesystem revisions
+   UINT s_mkfs_time;
+   UINT s_jnl_blocks[17];
+
+   // -- 64-bit support --
+   UINT s_blocks_count_hi;
+   UINT s_r_blocks_count_hi;
+   UINT s_free_blocks_count_hi;
+   WORD s_min_extra_isize;
+   WORD s_want_extra_isize;
+   UINT s_flags;
+
+   BYTE reserved[668]; // Reserved for future filesystem revisions (total struct size == 1024 bytes)
 } SUPERBLK, *PSUPERBLK;
 
-// block group descriptor structure
+// block group descriptor structure (legacy 32-byte)
 typedef struct {              // Block Group Descriptor
    UINT bg_block_bitmap;      // ** absolute block-id of first block of block bitmap for this block group.
    UINT bg_inode_bitmap;
@@ -86,6 +101,33 @@ typedef struct {              // Block Group Descriptor
    WORD bg_pad;               // pad to quad boundary.
    WORD bg_reserved[6];       // pad to 32 bytes.
 } BGD, *PBGD;
+
+// ext4 block group descriptor structure (64-byte)
+typedef struct {
+   UINT bg_block_bitmap;      // lower 32 bits
+   UINT bg_inode_bitmap;
+   UINT bg_inode_table;
+   WORD bg_free_blocks_count;
+   WORD bg_free_inodes_count;
+   WORD bg_used_dirs_count;
+   WORD bg_flags;
+   UINT bg_exclude_bitmap_lo;
+   WORD bg_block_bitmap_csum_lo;
+   WORD bg_inode_bitmap_csum_lo;
+   WORD bg_itable_unused;
+   WORD bg_checksum;
+   UINT bg_block_bitmap_hi;   // high 32 bits of block bitmap (64-bit mode)
+   UINT bg_inode_bitmap_hi;
+   UINT bg_inode_table_hi;
+   WORD bg_free_blocks_count_hi;
+   WORD bg_free_inodes_count_hi;
+   WORD bg_used_dirs_count_hi;
+   WORD bg_itable_unused_hi;
+   UINT bg_exclude_bitmap_hi;
+   WORD bg_block_bitmap_csum_hi;
+   WORD bg_inode_bitmap_csum_hi;
+   UINT bg_reserved;
+} EXT4_GROUP_DESC, *PEXT4_GROUP_DESC;
 
 // unix style datestamp == seconds since 1st Jan, 1970.
 typedef UINT XTIME;

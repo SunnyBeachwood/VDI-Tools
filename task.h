@@ -55,5 +55,7 @@ void TaskBatch_Destroy(VDI_TASK_BATCH *batch);
 BOOL Task_CurrentCancelRequested(void);
 UINT Task_CurrentIOBurstBlocks(void);
 void Task_ReportProgress(double doneBytes, double totalBytes);
+void Task_MediaRegistryEnter(void);
+void Task_MediaRegistryLeave(void);
 
 #endif
